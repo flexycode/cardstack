@@ -55,6 +55,7 @@
     "eslint-plugin-mocha": "^5.2.0",
     "eslint-plugin-node": "^5.2.1",
     "koa-better-route": "^0.1.0",
+    "qs": "^6.6.0",
     "supertest": "^2.0.1"
   },
   "engines": {

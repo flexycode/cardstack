@@ -121,8 +121,8 @@
                 "packages/test-support/bin/run.js",
                 "--timeout",
                 "200000",
-                // "--grep",
-                // "can derive relationships to cards embedded within mobiledoc"
+                "--grep",
+                "indexes models with related resource links"
             ]
         },
         {

@@ -7,6 +7,7 @@ const {
 } = require('../../../tests/stub-project/node_modules/@cardstack/test-support/env');
 const { createReadStream, readdirSync } = require('fs');
 const path = require('path');
+const qs = require('qs');
 
 describe('hub/indexers', function() {
   let env;
@@ -60,6 +61,7 @@ describe('hub/indexers', function() {
       let doc = await env.lookup('hub:searchers').get(env.session, 'master', 'field-types', 'sample-plugin-one::x');
       expect(doc).is.ok;
     });
+
 
   });
 
@@ -130,6 +132,56 @@ describe('hub/indexers', function() {
       expect(response.data[1].attributes).has.property('file-name').includes('snalc.gif');
     });
 
+  });
+
+  describe('related resource links', async function() {
+    it("indexes models with related resource links", async function() {
+      let seeds = new JSONAPIFactory();
+      seeds.addResource('content-types', 'treats')
+        .withRelated('fields', [
+          seeds.addResource('fields', 'crunchiness').withAttributes({
+            fieldType: '@cardstack/core-types::integer'
+          })
+        ]);
+      seeds.addResource('content-types', 'puppies')
+        .withRelated('fields', [
+          seeds.addResource('fields', 'treats').withAttributes({
+            fieldType: '@cardstack/core-types::has-many'
+          })
+        ]);
+
+      seeds.addResource('treats', 'milkBiscuit').withAttributes({ crunchiness: 9 });
+      seeds.addResource('treats', 'banana').withAttributes({ crunchiness: 1 });
+      seeds.addResource('treats', 'carrot').withAttributes({ crunchiness: 8 });
+
+      let query = {
+        filter: {
+          type: { exact: 'treats' },
+          crunchiness: { range: { gt: 5 } }
+        },
+        sort: 'crunchiness'
+      };
+
+      let puppy = {
+        id: 'vanGogh',
+        type: 'puppies',
+        relationships: {
+          treats: {
+            links: {
+              related: `/api?${qs.stringify(query)}`
+            }
+          }
+        }
+      };
+
+      env = await createDefaultEnvironment(__dirname + '/../../../tests/ephemeral-test-app', seeds.getModels().concat([ puppy ]));
+      let { data:resource } = await env.lookup('hub:searchers').get(env.session, 'master', 'puppies', 'vanGogh');
+      expect(resource.relationships.treats.links.related).to.equal(`/api?${qs.stringify(query)}`);
+      expect(resource.relationships.treats.data).to.eql([
+        { type: 'treats', id: 'carrot' },
+        { type: 'treats', id: 'milkBiscuit' }
+      ]);
+    });
   });
 
   describe("nested data sources", function() {
