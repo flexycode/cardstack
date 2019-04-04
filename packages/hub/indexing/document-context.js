@@ -353,7 +353,11 @@ module.exports = class DocumentContext {
       }
       if (contentType.computedFields.has(field.id) ||
           (jsonapiDoc.relationships && jsonapiDoc.relationships.hasOwnProperty(field.id))) {
-        let value = { data: await userModel.getField(field.id) };
+
+        let value = {
+          data: await userModel.getField(field.id),
+          links: userModel.getLinks(field.id)
+        };
         let fieldset = fieldsets && fieldsets.find(f => f.field === field.id);
         await this._buildRelationship(field, value, pristineDocOut, searchDocOut, searchTree, depth, get(fieldset, 'format'));
       }
@@ -384,7 +388,9 @@ module.exports = class DocumentContext {
         ensure(pristineDocOut, 'relationships')[field.id] = Object.assign({}, value, { data });
       }
     } else {
-      related = value.data;
+      if (value.data) {
+        related = value.data;
+      }
       ensure(pristineDocOut, 'relationships')[field.id] = Object.assign({}, value);
     }
     searchDocOut[field.id] = related;

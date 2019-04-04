@@ -1,6 +1,6 @@
 // This implements the public interface that allows user-provided code
 // (like computed fields) to access models.
-
+const { get } = require('lodash');
 const priv = new WeakMap();
 
 module.exports = class Model {
@@ -25,6 +25,13 @@ module.exports = class Model {
     if (jsonapiDoc) {
       return jsonapiDoc.meta;
     }
+  }
+
+  // TODO watch out its probblyok for a relationship to have both links and data...
+  getLinks(fieldName) {
+    let { jsonapiDoc } = priv.get(this);
+
+    return get(jsonapiDoc, `relationships.${fieldName}.links`);
   }
 
   async getField(fieldName) {

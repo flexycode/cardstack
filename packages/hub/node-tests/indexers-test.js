@@ -162,19 +162,10 @@ describe('hub/indexers', function() {
         sort: 'crunchiness'
       };
 
-      let puppy = {
-        id: 'vanGogh',
-        type: 'puppies',
-        relationships: {
-          treats: {
-            links: {
-              related: `/api?${qs.stringify(query)}`
-            }
-          }
-        }
-      };
+      seeds.addResource('puppies', 'vanGogh')
+        .withRelatedLink('treats', `/api?${qs.stringify(query)}`);
 
-      env = await createDefaultEnvironment(__dirname + '/../../../tests/ephemeral-test-app', seeds.getModels().concat([ puppy ]));
+      env = await createDefaultEnvironment(__dirname + '/../../../tests/ephemeral-test-app', seeds.getModels());
       let { data:resource } = await env.lookup('hub:searchers').get(env.session, 'master', 'puppies', 'vanGogh');
       expect(resource.relationships.treats.links.related).to.equal(`/api?${qs.stringify(query)}`);
       expect(resource.relationships.treats.data).to.eql([
