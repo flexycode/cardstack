@@ -135,7 +135,7 @@ describe('hub/indexers', function() {
   });
 
   describe('related resource links', async function() {
-    it("indexes models with related resource links", async function() {
+    it("indexes models with related resource links for has-many relationships", async function() {
       let seeds = new JSONAPIFactory();
       seeds.addResource('content-types', 'treats')
         .withRelated('fields', [
@@ -172,6 +172,30 @@ describe('hub/indexers', function() {
         { type: 'treats', id: 'carrot' },
         { type: 'treats', id: 'milkBiscuit' }
       ]);
+    });
+
+    // Probably this is test that goes in searchers-test.js?
+    it("can return latest result of relationship query when the result of a query changes", async function() {
+      // we should use the test above, but then add or remove a treat and confirm that the relationship's models
+      // in the resulting hub:search.search() response changes to reflect the newly added (or deleted) treat
+
+      // TODO
+      expect(true).to.equal(false);
+    });
+
+    it("indexes models with related resource links for empty has-many relationships", async function() {
+      // TODO
+      expect(true).to.equal(false);
+    });
+
+    it("indexes models with related resource links for empty belongs-to relationships", async function() {
+      // TODO
+      expect(true).to.equal(false);
+    });
+
+    it("indexes models with related resource links for belongs-to relationships", async function() {
+      // TODO
+      expect(true).to.equal(false);
     });
   });
 
